@@ -1,0 +1,156 @@
+关于AS中gradle构建脚本的配置。在Android的module中主要是这几个脚本
+
+1.apply plugin
+	必须放在第一行，它可以指定这个module是一个应用（用 apply plugin: ‘com.android.application’ 配置），或是一个库（用 apply plugin: ‘com.android.library’ 配置）。
+	
+	
+2.dependencies节点  //项目中的依赖库，在这里设置。
+	compile fileTree(include: ['*.jar'], dir: 'libs') //表示 编译时，可以依赖包括libs下的jar包。如果项目中有jar包，必须添加此行才能依赖jar
+	compile files('libs/android-async-http-master.jar') //表示依赖libs下的android-async-http-master.jar
+	compile project(':library') //表示 依赖本地的library类型的叫做 library 的 module
+	compile 'com.android.support:appcompat-v7:21.0.3' // 表示依赖远程库 com.android.support:appcompat-v7:21.0.3。
+
+3.关于android节点的常用脚本：
+android {
+
+	compileSdkVersion 26 编译的Android的SDK版本
+    buildToolsVersion 26.0.2 编译工具的版本
+	
+	aaptOptions.cruncherEnabled = false //取消对应用中的png,  .9图片的合法性检查
+    aaptOptions.useNewCruncher = false //取消对应用中的png,  .9图片的合法性检查
+	
+	defaultConfig {
+		//这个是默认配置，相当于eclipse中manifest中的一些基本配置，buildType中也将自动继承。 
+		//它里面可以放入很多配置，如下面buildTypes/release的一些配置也可放入其中
+		
+		applicationId com.example.app.application //如果是apk项目必须要applicationId 配置，表示的是包名。但如果是library类型的则不需要
+		minSdkVersion 15 //应用支持的最低版本
+		targetSdkVersion 21 //应用的目标版本
+		versionCode 1 //应用代码版本
+		versionName 1.0.0 //应用的版本名称
+
+		ndk {//ndk配置也可以放在这里
+			moduleName app
+			cFlags -DANDROID_NDK -D_RELEASE
+			ldLibs m, log, jnigraphics
+			abiFilters all
+		}
+	}
+	
+    lintOptions {
+        // 设置为 true时lint将不报告分析的进度
+        quiet true
+        // 如果为 true，则当lint发现错误时停止 gradle构建
+        abortOnError false
+        // 如果为 true，则只报告错误
+        ignoreWarnings true
+        // 如果为 true，则当有错误时会显示文件的全路径或绝对路径 (默认情况下为true)
+        //absolutePaths true
+        // 如果为 true，则检查所有的问题，包括默认不检查问题
+        checkAllWarnings true
+        // 如果为 true，则将所有警告视为错误
+        warningsAsErrors true
+        // 不检查给定的问题id
+        disable 'TypographyFractions','TypographyQuotes'
+        // 检查给定的问题 id
+        enable 'RtlHardcoded','RtlCompat', 'RtlEnabled'
+        // * 仅 * 检查给定的问题 id
+        check 'NewApi', 'InlinedApi'
+        // 如果为true，则在错误报告的输出中不包括源代码行
+        noLines true
+        // 如果为 true，则对一个错误的问题显示它所在的所有地方，而不会截短列表，等等。
+        showAll true
+        // 重置 lint 配置（使用默认的严重性等设置）。
+        lintConfig file("default-lint.xml")
+        // 如果为 true，生成一个问题的纯文本报告（默认为false）
+        textReport true
+        // 配置写入输出结果的位置；它可以是一个文件或 “stdout”（标准输出）
+        textOutput 'stdout'
+        // 如果为真，会生成一个XML报告，以给Jenkins之类的使用
+        xmlReport false
+        // 用于写入报告的文件（如果不指定，默认为lint-results.xml）
+        xmlOutput file("lint-report.xml")
+        // 如果为真，会生成一个HTML报告（包括问题的解释，存在此问题的源码，等等）
+        htmlReport true
+        // 写入报告的路径，它是可选的（默认为构建目录下的 lint-results.html ）
+        htmlOutput file("lint-report.html")
+
+		// 设置为 true， 将使所有release 构建都以issus的严重性级别为fatal（severity=false）的设置来运行lint
+		// 并且，如果发现了致命（fatal）的问题，将会中止构建（由上面提到的 abortOnError 控制）
+		checkReleaseBuilds true
+        // 设置给定问题的严重级别（severity）为fatal （这意味着他们将会
+        // 在release构建的期间检查 （即使 lint 要检查的问题没有包含在代码中)
+        fatal 'NewApi', 'InlineApi'
+        // 设置给定问题的严重级别为error
+        error 'Wakelock', 'TextViewEdits'
+        // 设置给定问题的严重级别为warning
+        warning 'ResourceAsColor'
+        // 设置给定问题的严重级别（severity）为ignore （和不检查这个问题一样）
+        ignore 'TypographyQuotes'
+    }
+	
+	
+	signingConfigs {//签名文件配置
+        debug {
+            //miaomiao_keystore.jks文件最好放在项目app目录下
+            storeFile file("miaomiao_keystore.jks")//签名文件
+            storePassword "123456"//签名文件的密码
+            keyAlias "miaomiao"//签名文件的别名
+            keyPassword "123456"//签名文件的密码
+        }
+        release {
+            //miaomiao_keystore.jks文件最好放在项目app目录下
+            storeFile file("miaomiao_keystore.jks")
+            storePassword "123456"
+            keyAlias "miaomiao"
+            keyPassword "123456"
+        }
+    }
+
+	buildTypes {
+        debug {
+            buildConfigField "String", "SERVERHEAD", "\"http://110.11.11.00/miaomiao/\""   // 服务器配置
+            minifyEnabled false  //是否混淆
+            zipAlignEnabled true //是否对齐app所有资源,对齐后,会使得在运行时Android与应用程序间的交互更加有效率;
+            shrinkResources false //配置true,移除无用的resource文件,可以减小apk包的大小,有瘦身效果;
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro' //混淆文件
+            signingConfig signingConfigs.debug //就是指上面的签名文件配置
+
+        }
+        release {
+            // 正式服务器
+            buildConfigField "String", "SERVERHEAD", "\"http://miaomiao.com/miaomiao/\""
+            //混淆
+            minifyEnabled true
+            zipAlignEnabled true//内存对齐
+            // 移除无用的resource文件
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //签名
+            signingConfig signingConfigs.release
+        }
+    }
+	
+	compileOptions {
+		//编译选择，下面是启用java8
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+	
+	sourceSets {//目录指向配置
+        main {
+            manifest.srcFile 'AndroidManifest.xml'//指定AndroidManifest文件
+            java.srcDirs = ['src']//指定source目录
+            resources.srcDirs = ['src']//指定source目录
+            aidl.srcDirs = ['src']//指定source目录
+            renderscript.srcDirs = ['src']//指定source目录
+            res.srcDirs = ['res']//指定资源目录
+            assets.srcDirs = ['assets']//指定assets目录
+            jniLibs.srcDirs = ['libs']//指定lib库目录
+        }
+        debug.setRoot('build-types/debug')//指定debug模式的路径
+        release.setRoot('build-types/release')//指定release模式的路径
+    }
+
+}
+

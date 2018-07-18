@@ -1,0 +1,274 @@
+分为5部分： 
+=================== 定制化区域================= 
+1. 实体类区域 
+项目中的实体类，最好放在一个包下，如果没有也没关系，一个个添加下就可以了！比如我的实体类大多数放在entity包下面，所以就这样写：
+
+-keep class com.qmovies.media.TV.entity.** { *; }
+1
+第三方包区域 
+项目中使用第三方包是很难避免的！一般所使用的第三方包官方都会有提供，如果没有，那就Google或者百度，实在找不到，就自己写吧： 
+贴一下我常用的包，这些包的混淆配置在下面都有配置。 
+compile ‘com.google.code.gson:gson:2.8.0’ 
+compile ‘com.android.support:appcompat-v7:25.1.1’ 
+compile ‘com.android.support:support-v4:25.1.1’ 
+compile ‘com.android.support:design:25.1.1’ 
+compile ‘com.flyco.tablayout:FlycoTabLayout_Lib:2.0.0@aar’ 
+compile ‘com.miguelcatalan:materialsearchview:1.4.0’ 
+compile ‘com.jakewharton:butterknife:8.4.0’ 
+compile ‘io.reactivex:rxandroid:1.1.0’ 
+compile ‘io.reactivex:rxjava:1.1.0’ 
+compile ‘com.artemzin.rxjava:proguard-rules:1.2.9.0’ 
+compile ‘com.github.bumptech.glide:glide:3.7.0’ 
+compile ‘com.trello:rxlifecycle-components:0.6.1’ 
+compile ‘com.facebook.stetho:stetho:1.3.1’ 
+compile ‘com.facebook.stetho:stetho-okhttp3:1.3.1’ 
+compile ‘com.google.code.gson:gson:2.8.0’ 
+compile ‘com.squareup.retrofit2:retrofit:2.0.0-beta4’ 
+compile ‘com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4’ 
+compile ‘com.squareup.retrofit2:converter-gson:2.0.0-beta4’ 
+compile ‘com.squareup.okhttp3:okhttp:3.2.0’ 
+compile ‘com.squareup.okhttp3:logging-interceptor:3.2.0’ 
+compile ‘com.android.support:cardview-v7:25.1.1’ 
+compile ‘com.google.android.exoplayer:exoplayer:r2.2.0’ 
+compile ‘org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2’ 
+testCompile ‘junit:junit:4.12’ 
+apt ‘com.jakewharton:butterknife-compiler:8.4.0’ 
+compile ‘com.umeng.analytics:analytics:latest.integration
+如果你实在没有找到，该怎么写呢？
+第一种：按部就班的照抄，抄格式。
+第二种：我就这个包的所有文件都不提示，不混淆了。能拿我怎样？比如下面这个。
+我的导入包名为： compile 'com.flyco.tablayout:FlycoTabLayout_Lib:2.0.0@aar'
+混淆配置可以写成：
+```
+#flyco
+-dontwarn com.flyco.tablayout.**
+-keep class com.flyco.tablaout.**{ *;}
+```
+
+与js互调区域 
+工程中没用到，可不写。
+反射相关区域 
+工程中没用到，可不写。
+==================基本不用动区域================ 
+1. 基本指令区域 
+2. 默认保留区 
+3. webView 
+这个区域基本通用，可以照抄。
+
+
+----------------------------------------------下面就是常用的代码混淆规则实例---------------------------------------------------------------
+
+#-------------------------------------------定制化区域----------------------------------------------
+#---------------------------------1.实体类---------------------------------
+
+-keep class com.qmovies.media.TV.entity.** { *; }
+-keep class com.qmovies.media.TV.model.entity.** { *; }
+-keep class com.qmovies.media.TV.model.task.TasksManagerModel { *; }
+-keep class com.qmovies.media.TV.widght.banner.BannerEntity { *; }
+
+
+#-------------------------------------------------------------------------
+
+#---------------------------------2.第三方包-------------------------------
+##---------------Begin: proguard configuration for Gson ----------
+-keep public class com.google.gson.**
+-keep public class com.google.gson.** {public private protected *;}
+
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep public class com.project.mocha_patient.login.SignResponseData { private *; }
+
+##---------------End: proguard configuration for Gson ----------
+#如果需要保存内部类，需要如下声明
+-keep class com.project.mocha_patient.login.FindForgotInfoActivity$ForgetResponse {*;}
+-keep class com.project.mocha_patient.account_setting.ChangePasswordActivity$ChangePasswordResponse {*;}
+
+#Glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+#OkHttp
+-dontwarn com.squareup.okhttp3.**
+-keep class com.squareup.okhttp3.** { *;}
+-dontwarn okio.**
+#retrofit2
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+#stetho
+-keep class com.facebook.stetho.** { *; }
+-dontwarn org.mozilla.javascript.**
+-dontwarn org.mozilla.classfile.**
+-keep class org.mozilla.javascript.** { *; }
+
+##Butterknife
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+#RxJava/RxAndroid
+-dontwarn sun.misc.**
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+   long producerIndex;
+   long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+#友盟统计
+-keepclassmembers class * {
+   public <init> (org.json.JSONObject);
+}
+#友盟推送
+-dontwarn com.taobao.**
+-dontwarn anet.channel.**
+-dontwarn anetwork.channel.**
+-dontwarn org.android.**
+-dontwarn org.apache.thrift.**
+-dontwarn com.xiaomi.**
+-dontwarn com.huawei.**
+-dontwarn com.ta.**
+-keep class com.taobao.** {*;}
+-keep class org.android.** {*;}
+-keep class anet.channel.** {*;}
+-keep class com.umeng.** {*;}
+-keep class com.xiaomi.** {*;}
+-keep class com.huawei.** {*;}
+-keep class org.apache.thrift.** {*;}
+
+-keep class com.alibaba.sdk.android.**{*;}
+-keep class com.ut.**{*;}
+-keep class com.ta.**{*;}
+#flyco
+-dontwarn com.flyco.tablayout.**
+-keep class com.flyco.tablaout.**{ *;}
+
+#org.apache.http
+-dontwarn org.apache.http.**
+-keep class org.apache.http.**{ *;}
+
+#-------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------
+
+#---------------------------------3.与js互相调用的类------------------------
+
+
+
+#-------------------------------------------------------------------------
+
+#---------------------------------4.反射相关的类和方法-----------------------
+
+
+# 下拉刷新
+-keep class in.srain.cube.** { *; }
+-keep interface in.srain.cube.** { *; }
+-dontwarn in.srain.cube.**
+# observablescrollview：tab fragment
+-keep class com.github.ksoichiro.** { *; }
+-keep interface com.github.ksoichiro.** { *; }
+-dontwarn com.github.ksoichiro.**
+
+#-------------------------------------------基本不用动区域--------------------------------------------
+#---------------------------------基本指令区----------------------------------
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontskipnonpubliclibraryclassmembers
+-dontpreverify
+-verbose
+-printmapping proguardMapping.txt
+-optimizations !code/simplification/cast,!field/*,!class/merging/*
+-keepattributes *Annotation*,InnerClasses
+-keepattributes Signature
+-keepattributes SourceFile,LineNumberTable
+#----------------------------------------------------------------------------
+
+#---------------------------------默认保留区---------------------------------
+#保护注解
+-keepattributes *Annotation*
+-keep public class * extends android.app.Fragment
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Appliction
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.preference.Preference
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class * extends android.view.View
+-keep public class com.android.vending.licensing.ILicensingService
+-keep class android.support.** {*;}
+#保持 native 方法不被混淆
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+#保持自定义控件类不被混淆
+-keepclassmembers class * extends android.app.Activity{
+    public void *(android.view.View);
+}
+#保持枚举 enum 类不被混淆
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+-keep public class * extends android.view.View{
+    *** get*();
+    void set*(***);
+    public <init>(android.content.Context);
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+#保持 Parcelable 不被混淆
+-keep class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator *;
+}
+#保持 Serializable 不被混淆
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+#不混淆资源类
+-keep class **.R$* {
+ *;
+}
+-keepclassmembers class * {
+    void *(**On*Event);
+}
+#----------------------------------------------------------------------------
+
+#---------------------------------webview------------------------------------
+-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+   public *;
+}
+-keepclassmembers class * extends android.webkit.webViewClient {
+    public void *(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
+    public boolean *(android.webkit.WebView, java.lang.String);
+}
+-keepclassmembers class * extends android.webkit.webViewClient {
+    public void *(android.webkit.webView, jav.lang.String);
+}
+#----------------------------------------------------------------------------
